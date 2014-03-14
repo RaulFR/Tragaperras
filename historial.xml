@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<tragaperras>
+   <jugada>
+      <saldojugador>10.5</saldojugador>
+      <saldomaquina>1010.0</saldomaquina>
+      <premio>1.0</premio>
+   </jugada>
+   <jugada>
+      <saldojugador>20.0</saldojugador>
+      <saldomaquina>1010.0</saldomaquina>
+      <premio>10.0</premio>
+   </jugada>
+   <jugada>
+      <saldojugador>19.5</saldojugador>
+      <saldomaquina>1010.0</saldomaquina>
+      <premio>0.0</premio>
+   </jugada>
+</tragaperras>

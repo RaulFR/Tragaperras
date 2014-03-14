@@ -1,7 +1,11 @@
 package jackpot;
 
+import java.sql.Date;
 import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
 import javax.swing.ImageIcon;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 public class Main extends javax.swing.JFrame {
@@ -9,8 +13,13 @@ public class Main extends javax.swing.JFrame {
     /**
      * Creates new form Main
      */
-    public Saldo saldo = new Saldo();
+    Saldo saldo = new Saldo();
     Partida partida = new Partida();
+    Historial historial = new Historial();
+
+    ArrayList<Jugada> jugadasList;
+    private final String XML_FILE_NAME= "historial.xml";
+    
     NumberFormat formateador = NumberFormat.getCurrencyInstance();
 
     public Main() {
@@ -19,6 +28,9 @@ public class Main extends javax.swing.JFrame {
         setLocationByPlatform(true);
         jButtonPalanca.setEnabled(false);
         jButtonCobrar.setEnabled(false);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        
+        jugadasList = historial.getPersonsList();
     }
 
     /**
@@ -52,6 +64,11 @@ public class Main extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Jackpot");
         setResizable(false);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                formWindowClosing(evt);
+            }
+        });
 
         jButtonPalanca.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/palanca.png"))); // NOI18N
         jButtonPalanca.addActionListener(new java.awt.event.ActionListener() {
@@ -267,17 +284,16 @@ public class Main extends javax.swing.JFrame {
     private void jButtonPalancaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonPalancaActionPerformed
 
         saldo.incrementarSaldoJugador(saldo.INVERTIR);
-        
-        
 
         partida.generarSecuencia();
         saldo.incrementarSaldoJugador(partida.comprobarPremio());
         jLabelPremio.setText(formateador.format(partida.comprobarPremio()));
-        
+
         System.out.println(formateador.format(saldo.getSaldoMaquina()));
-        
+
+        insertarJugada();
+
         jLabelSaldo.setText(String.valueOf(formateador.format(saldo.getSaldoJugador())));
-        
 
         jLabelImagen1.setIcon(new ImageIcon(getClass().getResource("/imagenes/" + partida.getImagen(0) + ".png")));
         jLabelImagen2.setIcon(new ImageIcon(getClass().getResource("/imagenes/" + partida.getImagen(1) + ".png")));
@@ -287,9 +303,7 @@ public class Main extends javax.swing.JFrame {
             jButtonPalanca.setEnabled(false);
             jButtonCobrar.setEnabled(false);
         }
-        
-        
-        
+
 
     }//GEN-LAST:event_jButtonPalancaActionPerformed
 
@@ -327,14 +341,40 @@ public class Main extends javax.swing.JFrame {
 
     private void jButtonCobrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCobrarActionPerformed
         jLabelSaldo.setText(formateador.format(0));
-        if(saldo.getSaldoMaquina()> saldo.getSaldoJugador()){
+        if (saldo.getSaldoMaquina() > saldo.getSaldoJugador()) {
             JOptionPane.showMessageDialog(this, "Gracias por Jugar \nUsted Recibe: " + formateador.format(saldo.cobrarSaldo()), "Congratulations", JOptionPane.INFORMATION_MESSAGE);
-        } else{
+        } else {
             JOptionPane.showMessageDialog(this, "Gracias por Jugar \nPase por caja para cobrar: " + formateador.format(saldo.cobrarSaldo()), "Atencion", JOptionPane.INFORMATION_MESSAGE);
         }
-        
+
         System.out.println(formateador.format(saldo.getSaldoMaquina()));
     }//GEN-LAST:event_jButtonCobrarActionPerformed
+
+    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+        int respuesta = JOptionPane.showConfirmDialog(this, "¿Desea apagar la máquina?",
+                "Apagando", JOptionPane.OK_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE);
+        if (respuesta == JOptionPane.OK_OPTION) {
+            historial.generarXML(jugadasList, XML_FILE_NAME);
+            this.dispose();
+        } else {
+            historial.mostrarHistorial();
+        }
+    }//GEN-LAST:event_formWindowClosing
+
+    private void insertarJugada() {
+//        try {
+//            jugada.setFechaHora(new Date(jDateChooser1.getDate().getTime()));
+//        } catch (Exception ex) {
+//            jugada.getFechaHora(null);
+//        }
+        
+        Jugada jugada = new Jugada();
+        jugada.setFechaHora(new Date(Calendar.getInstance().getTimeInMillis()));
+        jugada.setSaldoJugador(saldo.getSaldoJugador());
+        jugada.setSaldoMaquina(saldo.getSaldoMaquina());
+        jugada.setPremio(partida.comprobarPremio());
+        jugadasList.add(jugada);
+    }
 
     /**
      * @param args the command line arguments
